@@ -1,5 +1,6 @@
 import shader from "./shaders/shaders.wgsl";
 import { TriangleMesh } from "./triangle_mesh";
+import { Material } from "./material";
 import {mat4} from "gl-matrix";
 
 export class Renderer {
@@ -19,6 +20,7 @@ export class Renderer {
 
     // Assets
     triangleMesh: TriangleMesh;
+    material: Material;
     t: number;
 
 
@@ -31,7 +33,7 @@ export class Renderer {
 
         await this.setupDevice();
 
-        this.createAssets();
+        await this.createAssets();
     
         await this.makePipeline();
     
@@ -70,6 +72,16 @@ export class Renderer {
                     binding: 0,
                     visibility: GPUShaderStage.VERTEX,
                     buffer: {}
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {}
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    sampler: {}
                 }
             ],
         });
@@ -82,6 +94,14 @@ export class Renderer {
                     resource: {
                         buffer: this.uniformBuffer
                     }
+                },
+                {
+                    binding: 1,
+                    resource: this.material.view
+                },
+                {
+                    binding: 2,
+                    resource: this.material.sampler
                 }
             ]
         });
@@ -118,8 +138,11 @@ export class Renderer {
 
     }
 
-    createAssets() {
+    async createAssets() {
         this.triangleMesh = new TriangleMesh(this.device);
+        this.material = new Material();
+
+        await this.material.initialize(this.device, "dist/img/default.jpg");
     }
 
     render = () => {
