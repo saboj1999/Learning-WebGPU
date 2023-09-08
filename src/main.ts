@@ -20,7 +20,27 @@ const Initialize = async() =>
     context.configure({
         device: device,
         format: format,
+        alphaMode: "opaque",
     });
+
+    const bindGroupLayout = device.createBindGroupLayout(
+        {
+            entries: [],
+        }
+    );
+
+    const bindGroup = device.createBindGroup(
+        {
+            layout: bindGroupLayout,
+            entries: [],
+        }
+    );
+
+    const pipelineLayout = device.createPipelineLayout(
+        {
+            bindGroupLayouts: [bindGroupLayout],
+        }
+    );
 
     const pipeline : GPURenderPipeline = device.createRenderPipeline({
         vertex : {
@@ -44,7 +64,7 @@ const Initialize = async() =>
             topology: "triangle-list"
         },
 
-        layout: "auto"
+        layout: pipelineLayout
     });
 
     const commandEncoder : GPUCommandEncoder = device.createCommandEncoder();
@@ -59,6 +79,7 @@ const Initialize = async() =>
     });
     
     renderpass.setPipeline(pipeline);
+    renderpass.setBindGroup(0, bindGroup);
     renderpass.draw(3, 1, 0, 0);
     renderpass.end();
 
