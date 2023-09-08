@@ -15,6 +15,7 @@
   "dependencies": {
     "@types/node": "^17.0.30",
     "@webgpu/types": "^0.1.15",
+    "gl-matrix": "^3.4.3",
     "http-server": "^14.1.0",
     "node": "^17.7.2",
     "ts-loader": "^9.2.9",
