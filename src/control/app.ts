@@ -54,9 +54,7 @@ export class App
         this.scene.move_player(this.forwards_amount, this.right_amount);
         
         this.renderer.render(
-            this.scene.get_player(),
-            this.scene.get_triangles(),
-            this.scene.triangle_count
+            this.scene.get_renderables()
         );
 
         if(running)
@@ -115,7 +113,7 @@ export class App
         this.mouseYLabel.innerText = event.clientY.toString();
 
         this.scene.spin_player(
-            event.movementX / 5, -event.movementY / 5
+            event.movementX / 5, event.movementY / 5
         );
     }
 }
