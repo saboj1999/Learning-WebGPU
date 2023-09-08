@@ -8,7 +8,8 @@
 //     output_label.innerText = "WebGPU is not supported on this browser";
 // }
 
-import shader from "./shaders.wgsl"
+import shader from "./shaders.wgsl";
+import { TriangleMesh } from "./triangle_mesh";
 
 const Initialize = async() => 
 {
@@ -22,6 +23,8 @@ const Initialize = async() =>
         format: format,
         alphaMode: "opaque",
     });
+
+    const triangleMesh = new TriangleMesh(device);
 
     const bindGroupLayout = device.createBindGroupLayout(
         {
@@ -48,6 +51,7 @@ const Initialize = async() =>
                 code: shader
             }),
             entryPoint: "vs_main",
+            buffers: [triangleMesh.bufferLayout,]
         },
 
         fragment : {
@@ -80,6 +84,7 @@ const Initialize = async() =>
     
     renderpass.setPipeline(pipeline);
     renderpass.setBindGroup(0, bindGroup);
+    renderpass.setVertexBuffer(0, triangleMesh.buffer);
     renderpass.draw(3, 1, 0, 0);
     renderpass.end();
 
