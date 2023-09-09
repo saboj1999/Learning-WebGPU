@@ -4,6 +4,7 @@ import { QuadMesh } from "./quad_mesh";
 import { Material } from "./material";
 import { mat4 } from "gl-matrix";
 import { object_types, RenderData } from "../model/definitions";
+import { ObjMesh } from "./obj_mesh";
 
 export class Renderer {
 
@@ -31,6 +32,7 @@ export class Renderer {
     // Assets
     triangleMesh: TriangleMesh;
     quadMesh: QuadMesh;
+    statueMesh: ObjMesh;
     triangleMaterial: Material;
     quadMaterial: Material;
     objectBuffer: GPUBuffer;
@@ -155,12 +157,6 @@ export class Renderer {
 
     async makePipeline() {
 
-        this.uniformBuffer = this.device.createBuffer({
-            size: 64 * 2,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        })
-
-        
         const pipelineLayout = this.device.createPipelineLayout({
             bindGroupLayouts: [this.frameGroupLayout, this.materialGroupLayout]
         });
@@ -197,8 +193,15 @@ export class Renderer {
     async createAssets() {
         this.triangleMesh = new TriangleMesh(this.device);
         this.quadMesh = new QuadMesh(this.device);
+        this.statueMesh = new ObjMesh();
+        await this.statueMesh.initialize(this.device, "dist/models/fox.obj");
         this.triangleMaterial = new Material();
         this.quadMaterial = new Material();
+
+        this.uniformBuffer = this.device.createBuffer({
+            size: 64 * 2,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        })
 
         const modelBufferDescriptor: GPUBufferDescriptor =
         {
@@ -288,6 +291,15 @@ export class Renderer {
             0, objects_drawn
         );
         objects_drawn += renderables.object_counts[object_types.QUAD];
+
+        // Statue
+        renderpass.setVertexBuffer(0, this.statueMesh.buffer);
+        renderpass.setBindGroup(1, this.triangleMaterial.bindGroup);
+        renderpass.draw(
+            this.statueMesh.vertexCount, 1,
+            0, objects_drawn
+        );
+        objects_drawn += 1;
 
         renderpass.end();
     
